@@ -35,8 +35,8 @@ node *Input()
 {	int no;
 	node *head,*pn,*pt;
 	head=0;
-	cout<<"产生无序链表，输入学生学号与成绩："<<endl;
-	cout<<"学号"<<'\t'<<"姓名"<<'\t'<<"数学"<<'\t'<<"英语"<<'\t'<<"物理"<<'\t'<<"生物"<<'\t'<<"总分"<<endl;
+	cout<<"输入学生学号，姓名与成绩："<<endl;
+	cout<<"学号"<<'\t'<<"姓名"<<'\t'<<"数学"<<'\t'<<"英语"<<'\t'<<"物理"<<'\t'<<"生物"<<endl;
 	cin>>no;
 	while(no!=-1)
 	{	pn=new node;
@@ -64,12 +64,18 @@ node *Fix(node *head)
 	cout<<"输入要修改成绩的学生学号：";
 	cin>>no;
 	cout<<endl;
-	while(p->No !=no)
+	while(p!=0&&p->No !=no)
 		p=p->next ;
-	cout<<"输入修改后的成绩：";
-	cin>>p->Math>>p->Eng>>p->Phy>>p->Bio;
-	p->Sum =p->Math +p->Eng +p->Phy +p->Bio ;
-	cout<<"修改成功!"<<endl;
+	if(p==0)
+	{	cout<<"查找不到该学生；"<<endl;
+	}
+	else
+	{	cout<<"输入修改后的成绩：";
+		cin>>p->Math>>p->Eng>>p->Phy>>p->Bio;
+		p->Sum =p->Math +p->Eng +p->Phy +p->Bio ;
+		cout<<"修改成功!"<<endl;
+	}
+	
 	return head;
 }
 void Show(node *head)
@@ -86,6 +92,43 @@ void Show(node *head)
 		}
 	}
 }
+node *Filein()
+{		char ifstreamname[200];
+		node *head=0,*pn,*pt;
+		int no;
+		cout<<"输入要打开的文件名："<<endl;
+		cin>>ifstreamname;
+		ifstream infile;
+		infile.open (ifstreamname,ios::in );
+		if(!infile)
+		{	cout<<"不能打开文件"<<endl;
+			exit(1);
+		}
+		else
+		{	infile>>no;
+			while(no!=-1)
+			{	pn=new node;
+				pn->No =no;
+				infile>>pn->Name >>pn->Math >>pn->Eng >>pn->Phy >>pn->Bio ;
+				pn->Sum =pn->Math +pn->Eng +pn->Phy +pn->Bio ;
+				if(head==0)
+				{	head=pn;
+					pt=pn;
+				}
+				else
+				{	pt->next =pn;
+					pt=pn;
+				}
+				infile>>no;	
+			}
+										 
+			pt->next =0;
+			infile.close ();
+			cout<<"打开成功！"<<endl;
+			return head;
+		}
+			
+}
 node *Delete(node *head)
 {	node *pc,*pa;
 	int no;
@@ -97,15 +140,19 @@ node *Delete(node *head)
 		delete pa;
 	}
 	else
-	{	while(pa->No !=no)
+	{	while(pa!=0&&pa->No !=no)
 		{	pc=pa;
 			pa=pa->next ;	
 		}
-
-		pc->next =pa->next ;
-		delete pa;
+		if(pa==0)
+			cout<<"不存在该学生，删除失败"<<endl;
+		else
+		{	pc->next =pa->next ;
+			delete pa;
+			cout<<"删除成功~"<<endl;
+		}
 	}
-		cout<<"删除成功~"<<endl;
+		
 	return head;
 }
 /*node *Delete1(node *head,node *pn)
@@ -161,12 +208,17 @@ void Find(node *head)
 		cout<<pn->No <<'\t'<<pn->Name <<'\t'<<pn->Math <<'\t'<<pn->Eng<<'\t'<<pn->Phy<<'\t'<<pn->Bio <<'\t'<<pn->Sum<<endl ;
 	}
 	else
-	{	while(pn->No !=no)
+	{	while(pn!=0&&pn->No !=no)
 		{	pn=pn->next ;
 		}
-		cout<<"学号"<<'\t'<<"姓名"<<'\t'<<"数学"<<'\t'<<"英语"<<'\t'<<"物理"<<'\t'<<"生物"<<'\t'<<"总分"<<endl;
-		cout<<pn->No <<'\t'<<pn->Name <<'\t'<<pn->Math <<'\t'<<pn->Eng<<'\t'<<pn->Phy<<'\t'<<pn->Bio <<'\t'<<pn->Sum<<endl ;
+		if(pn==0)
+			cout<<"无法找到该学生！"<<endl;
+		else
+		{	cout<<"学号"<<'\t'<<"姓名"<<'\t'<<"数学"<<'\t'<<"英语"<<'\t'<<"物理"<<'\t'<<"生物"<<'\t'<<"总分"<<endl;
+			cout<<pn->No <<'\t'<<pn->Name <<'\t'<<pn->Math <<'\t'<<pn->Eng<<'\t'<<pn->Phy<<'\t'<<pn->Bio <<'\t'<<pn->Sum<<endl ;
+		}
 	}
+	
 }
 /*node *Insert(node *head,node *pn)
 {	node *pa,*pc;
@@ -183,8 +235,25 @@ void Find(node *head)
 	pn->next =pc;
 	return head;
 }*/
+node *Inputfinal()
+{	char flag[10];
+    node *head;
+	cout<<"请选择：1.输入学生成绩          2：从文件中导入"<<endl;
+	cin>>flag;
+	if(flag[1]!=0||flag[0]<'0'||flag[0]>'9')
+		cout<<"请输入正确的数字！"<<endl;
+	else
+	{	switch(flag[0])
+		{	case '1':head=Input();break;
+			case '2':head=Filein();
+		}
+	}
+	return head;
+}
 node *Sort(node *head)
 {	int i,j,k=0;
+	char name[100];
+	int m,e,p,b,n;
 	node *pa=head,*pc,*pn;
 	while(pa!=0)
 	{	k++;
@@ -199,6 +268,30 @@ node *Sort(node *head)
 			{	int s=pa->Sum ;
 				pa->Sum =pc->Sum ;
 				pc->Sum =s;
+
+				strcpy(name,pa->Name );
+				strcpy(pa->Name ,pc->Name );
+				strcpy(pc->Name ,name);
+
+				m=pa->Math ;
+				pa->Math =pc->Math ;
+				pc->Math =m;
+
+				e=pa->Eng ;
+				pa->Eng =pc->Eng ;
+				pc->Eng =e;
+
+				p=pa->Phy ;
+				pa->Phy =pc->Phy ;
+				pc->Phy =p;
+
+				b=pa->Bio ;
+				pa->Bio =pc->Bio ;
+				pc->Bio =b;
+
+				n=pa->No ;
+				pa->No =pc->No ;
+				pc->No =n;
 			}
 			pn=pn->next ;
 		}
@@ -216,20 +309,22 @@ void Emptify(node *head)
 	}
 	cout<<"已删除所有学生成绩"<<endl;
 }
-void File(node *head)
-{	char *path="D://student score.txt";
-	node *pn=head;
-	ofstream out(path);
-	if(out)
-	{	while(pn!=0)
-		{	out<<pn->No <<'\t'<<pn->Name <<'\t'<<pn->Math <<'\t'<<pn->Eng<<'\t'<<pn->Phy<<'\t'<<pn->Bio <<'\t'<<pn->Sum<<endl ;
-			pn=pn->next;
-		}
-	}
-	cout<<"已保存。"<<endl;
+
+void Fileout(node *head)
+{		char *path="D://student score.txt";
+		node *pn=head;
+		ofstream out(path);
+		if(out)
+		{	out<<"学号"<<'\t'<<"姓名"<<'\t'<<"数学"<<'\t'<<"英语"<<'\t'<<"物理"<<'\t'<<"生物"<<'\t'<<"总分"<<endl;
+			while(pn!=0)
+			{	out<<pn->No <<'\t'<<pn->Name <<'\t'<<pn->Math <<'\t'<<pn->Eng<<'\t'<<pn->Phy<<'\t'<<pn->Bio <<'\t'<<pn->Sum<<endl ;
+				pn=pn->next;
+			}
+		cout<<"已保存。"<<endl;	
+		}			
 }
 
-int main()
+int main() 
 {	char name[100],code[100];
 	node *head;
 	cout<<"用户名："<<endl;
@@ -247,7 +342,7 @@ int main()
 			else
 			{	switch(flag[0])
 				{	case '0':Getout();break;
-					case '1':head=Input();break;
+			    	case '1':head=Inputfinal();break;
 					case '2':Show(head);break;
 					case '3':head=Fix(head);break;
 					case '4':head=Delete(head);break;
@@ -255,7 +350,8 @@ int main()
 					case '6':Find(head);break;
 					case '7':head=Sort(head);break;
 					case '8':Emptify(head);break;
-					case '9':File(head);break;
+					case '9':Fileout(head);break;
+					
 				}
 			}
 		}
@@ -263,12 +359,4 @@ int main()
 	else
 		cout<<"登陆失败"<<endl;
 	return 0;
-
 }
-
-/*1001张三 80 85 81 70
-1005 老六 88 56 78 25
-1002 李四 89 95 97 58
-1003 赵四 85 65 77 78
-1004 王五 77 65 62 48
--1*/
